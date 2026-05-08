@@ -42,6 +42,12 @@ app.use(
   require("./routes/userRoutes")
 );
 
+
+
+app.get(/^(?!\/api).+/, (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

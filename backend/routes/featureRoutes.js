@@ -13,10 +13,14 @@ const authMiddleware =
 const {
   createFeature,
   getFeatures,
-  updateFeature
+  updateFeature,
+  editFeature,
+  deleteFeature
 } = require(
   "../controllers/featureController"
 );
+
+
 
 router.post(
   "/",
@@ -24,16 +28,36 @@ router.post(
   createFeature
 );
 
+
+
 router.get(
   "/",
   authMiddleware,
   getFeatures
 );
 
+
+
 router.put(
   "/:id",
   authMiddleware,
   updateFeature
+);
+
+
+
+router.patch(
+  "/:id",
+  authMiddleware,
+  editFeature
+);
+
+
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteFeature
 );
 
 module.exports = router;

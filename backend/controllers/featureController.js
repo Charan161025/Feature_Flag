@@ -2,6 +2,8 @@ const Feature = require(
   "../models/FeatureFlag"
 );
 
+
+
 exports.createFeature =
   async (req, res) => {
     try {
@@ -14,8 +16,6 @@ exports.createFeature =
         await Feature.create({
           featureKey,
           enabled,
-
-          
           organization:
             req.user.organization
         });
@@ -28,12 +28,13 @@ exports.createFeature =
     }
   };
 
+
+
 exports.getFeatures = async (
   req,
   res
 ) => {
   try {
-    
     const features =
       await Feature.find({
         organization:
@@ -48,14 +49,14 @@ exports.getFeatures = async (
   }
 };
 
+
+
 exports.updateFeature =
   async (req, res) => {
     try {
       const feature =
         await Feature.findOne({
           _id: req.params.id,
-
-          
           organization:
             req.user.organization
         });
@@ -73,6 +74,70 @@ exports.updateFeature =
       await feature.save();
 
       res.json(feature);
+    } catch (error) {
+      res.status(500).json({
+        message: error.message
+      });
+    }
+  };
+
+
+
+exports.editFeature =
+  async (req, res) => {
+    try {
+      const feature =
+        await Feature.findOne({
+          _id: req.params.id,
+          organization:
+            req.user.organization
+        });
+
+      if (!feature) {
+        return res.status(404).json({
+          message:
+            "Feature not found"
+        });
+      }
+
+      feature.featureKey =
+        req.body.featureKey;
+
+      await feature.save();
+
+      res.json(feature);
+    } catch (error) {
+      res.status(500).json({
+        message: error.message
+      });
+    }
+  };
+
+
+
+exports.deleteFeature =
+  async (req, res) => {
+    try {
+      const feature =
+        await Feature.findOneAndDelete(
+          {
+            _id: req.params.id,
+            organization:
+              req.user.organization
+          }
+        );
+
+      if (!feature) {
+        return res.status(404).json({
+          message:
+            "Feature not found"
+        });
+      }
+
+      res.json({
+        message:
+          "Feature deleted"
+      });
     } catch (error) {
       res.status(500).json({
         message: error.message

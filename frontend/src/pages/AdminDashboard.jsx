@@ -8,10 +8,15 @@ function AdminDashboard() {
   const [featureKey, setFeatureKey] =
     useState("");
 
+  const [editingId, setEditingId] =
+    useState(null);
+
+  const [editValue, setEditValue] =
+    useState("");
+
   const token =
     localStorage.getItem("token");
 
-  
 
   const fetchFeatures = async () => {
     try {
@@ -86,7 +91,62 @@ function AdminDashboard() {
     }
   };
 
+ 
+
+  const deleteFeature = async (
+    id
+  ) => {
+    try {
+      await API.delete(
+        `/features/${id}`,
+        {
+          headers: {
+            authorization: token
+          }
+        }
+      );
+
+      fetchFeatures();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   
+
+  const startEdit = (feature) => {
+    setEditingId(feature._id);
+
+    setEditValue(
+      feature.featureKey
+    );
+  };
+
+  
+
+  const saveEdit = async (id) => {
+    try {
+      await API.patch(
+        `/features/${id}`,
+        {
+          featureKey: editValue
+        },
+        {
+          headers: {
+            authorization: token
+          }
+        }
+      );
+
+      setEditingId(null);
+
+      fetchFeatures();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
 
   const logout = () => {
     localStorage.clear();
@@ -117,6 +177,7 @@ function AdminDashboard() {
         </button>
       </div>
 
+      
 
       <div style={sectionStyle}>
         <h2
@@ -144,7 +205,7 @@ function AdminDashboard() {
         </button>
       </div>
 
-     
+      
 
       <div style={gridStyle}>
         {features.map((feature) => (
@@ -152,24 +213,39 @@ function AdminDashboard() {
             key={feature._id}
             style={cardStyle}
           >
+           
+
+            {editingId ===
+            feature._id ? (
+              <input
+                value={editValue}
+                onChange={(e) =>
+                  setEditValue(
+                    e.target.value
+                  )
+                }
+                style={{
+                  ...inputStyle,
+                  marginBottom: "15px"
+                }}
+              />
+            ) : (
+              <h2
+                style={{
+                  marginBottom: "15px"
+                }}
+              >
+                {feature.featureKey}
+              </h2>
+            )}
+
             
-
-            <h2
-              style={{
-                marginBottom: "15px"
-              }}
-            >
-              {feature.featureKey}
-            </h2>
-
-         
 
             <p
               style={{
                 fontSize: "14px",
-                marginBottom: "25px",
-                wordBreak: "break-word",
-                color: "#333"
+                marginBottom: "20px",
+                wordBreak: "break-word"
               }}
             >
               <strong>
@@ -188,12 +264,12 @@ function AdminDashboard() {
                 display: "flex",
                 justifyContent:
                   "space-between",
-                alignItems: "center"
+                alignItems: "center",
+                marginBottom: "20px"
               }}
             >
               <span
                 style={{
-                  fontSize: "18px",
                   fontWeight: "bold"
                 }}
               >
@@ -202,7 +278,7 @@ function AdminDashboard() {
                   : "Disabled"}
               </span>
 
-              
+             
 
               <button
                 onClick={() =>
@@ -218,8 +294,7 @@ function AdminDashboard() {
                       ? "#4caf50"
                       : "#9e9e9e",
                   position: "relative",
-                  cursor: "pointer",
-                  transition: "0.3s"
+                  cursor: "pointer"
                 }}
               >
                 <div
@@ -233,10 +308,57 @@ function AdminDashboard() {
                     left:
                       feature.enabled
                         ? "38px"
-                        : "4px",
-                    transition: "0.3s"
+                        : "4px"
                   }}
                 />
+              </button>
+            </div>
+
+            
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px"
+              }}
+            >
+              {editingId ===
+              feature._id ? (
+                <button
+                  onClick={() =>
+                    saveEdit(
+                      feature._id
+                    )
+                  }
+                  style={actionButton}
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  onClick={() =>
+                    startEdit(feature)
+                  }
+                  style={actionButton}
+                >
+                  Edit
+                </button>
+              )}
+
+              <button
+                onClick={() =>
+                  deleteFeature(
+                    feature._id
+                  )
+                }
+                style={{
+                  ...actionButton,
+                  background:
+                    "#ff4d4d",
+                  color: "white"
+                }}
+              >
+                Delete
               </button>
             </div>
           </div>
@@ -278,16 +400,16 @@ const sectionStyle = {
 
 const inputStyle = {
   width: "100%",
-  padding: "18px",
+  padding: "16px",
   borderRadius: "14px",
   border: "none",
   background: "#d9d9d9",
-  marginBottom: "20px",
   fontSize: "16px",
   boxSizing: "border-box"
 };
 
 const buttonStyle = {
+  marginTop: "15px",
   padding: "16px 24px",
   borderRadius: "14px",
   border: "none",
@@ -319,6 +441,16 @@ const cardStyle = {
   color: "black",
   padding: "30px",
   borderRadius: "20px"
+};
+
+const actionButton = {
+  padding: "12px 18px",
+  border: "none",
+  borderRadius: "10px",
+  background: "#111",
+  color: "white",
+  cursor: "pointer",
+  fontWeight: "bold"
 };
 
 export default AdminDashboard;
